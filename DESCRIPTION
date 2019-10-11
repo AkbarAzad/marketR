@@ -8,7 +8,4 @@ Description: This package segments customers into New User, Retained or Returned
 License: GPL-2
 Encoding: UTF-8
 LazyData: FALSE
-Imports:
-  dplyr, data.table, sqldf, ggplot2, ggthemes, tidyverse, lubridate
-Suggests:
-  scales
+
