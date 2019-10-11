@@ -1,0 +1,14 @@
+Package: marketR
+Type: Package
+Title: Segment Purchasing Customers by Recency
+Version: 0.1.0
+Author: Akbar Azad
+Maintainer: Akbar Azad <akbarazad93@gmail.com>
+Description: This package segments customers into New User, Retained or Returned for each month.
+License: GPL-2
+Encoding: UTF-8
+LazyData: FALSE
+Imports:
+  dplyr, data.table, sqldf, ggplot2, ggthemes, tidyverse, lubridate
+Suggests:
+  scales
