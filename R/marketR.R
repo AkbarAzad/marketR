@@ -28,6 +28,10 @@ table_mau <- function(data, id_column_index, date_column_index) {
   #Date column needs to be in dmy format
   data_rev <- data %>%
     mutate(month_year = format(dmy(Date),'%Y-%m'))
+  
+  if(is.null(data_rev$month_year)) {
+    data_rev$month_year <- format(data_rev$Date,'%Y-%m')
+    }
 
 
   #remove duplicates by acct_id and month_year
