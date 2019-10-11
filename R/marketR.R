@@ -26,6 +26,11 @@ table_mau <- function(data, id_column_index, date_column_index) {
   colnames(data)[date_column_index] <- 'Date'
   #create month_year column in data
   #Date column needs to be in dmy format
+  
+  #select ACCT_ID and Date columns
+  
+  data <- data[,c('ACCT_ID','Date')]
+  
   data_rev <- data %>%
     mutate(month_year = format(dmy(Date),'%Y-%m'))
   
