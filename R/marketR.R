@@ -7,12 +7,14 @@
 #' @param id_column_index A column index of the dataframe where Customer IDs are stored.
 #' @param date_column_index A column index of the dataframe where date (of transaction) is stored in dmy format as factor or character.
 #' @param data_mau A dataframe which is the output of table_mau(data,id_column_index,date_column_index).
+#' @param size_sum A dbl number to specify size of text representing total number of customers in a month above bar in plot_mau.
+#; @param date_breaks_space A phrase to specify number of months as a gap between each monthly bar in plot_mau. 
 #
 #' @return NULL
 #
 #' @examples
 #' table_mau(data,1,2)
-#' plot_mau(data_mau)
+#' plot_mau(data_mau, 1.75, "3 months")
 #
 #' @export table_mau
 #' @export plot_mau
