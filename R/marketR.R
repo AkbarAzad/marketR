@@ -1,10 +1,11 @@
 #' @title Segment Purchasing Customers by Recency
 #
-#' @description This package segments customers into New User, Retained or Returned for each month.
+#' @description This package segments customers into New User, Retained or Returned for each month. Please load the following packages
+#' prior: dplyr, tidyverse, data.table, sqldf, lubridate, ggplot2, ggthemes.
 #
 #' @param data A dataframe.
 #' @param id_column_index A column index of the dataframe where Customer IDs are stored.
-#' @param date_column_index A column index of the dataframe where date (of transaction) is stored in dmy format.
+#' @param date_column_index A column index of the dataframe where date (of transaction) is stored in dmy format as factor or character.
 #' @param data_mau A dataframe which is the output of table_mau(data,id_column_index,date_column_index).
 #
 #' @return NULL
@@ -198,19 +199,22 @@ table_mau <- function(data, id_column_index, date_column_index) {
 
   colnames(comb)[1] <- 'Category'
 
+  comb <- comb %>% 
+          filter(Category != 0)
+  
   comb
 
 }
 
-plot_mau <- function(data_mau) {
+plot_mau <- function(data_mau, size_sum = 1.75, date_breaks_space = "6 months" ) {
   data_mau %>%
     filter(Category != 0) %>%
     gather(Month_Year, Users, -Category) %>%
     mutate(Month_Year = ymd(Month_Year)) %>%
     ggplot(aes(x=Month_Year,y=Users,fill=Category)) +
     geom_bar(stat='identity',colour="black",width=20) +
-    stat_summary(fun.y=sum,aes(label=..y..,group=Month_Year),geom="text",vjust=-1,size=1.75) +
-    scale_x_date(date_labels="%b %y",date_breaks="6 months")+
+    stat_summary(fun.y=sum,aes(label=..y..,group=Month_Year),geom="text",vjust=-1,size=size_sum) +
+    scale_x_date(date_labels="%b %y",date_breaks=date_breaks_space)+
     ggtitle("New, Retained and Returned Users") +
     theme_wsj() + theme(legend.text = element_text(size=15,face="bold")) + scale_fill_wsj("colors6")
 
