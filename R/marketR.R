@@ -206,7 +206,7 @@ table_mau <- function(data, id_column_index, date_column_index) {
 
 }
 
-plot_mau <- function(data_mau, size_sum = 1.75, date_breaks_space = "6 months" ) {
+plot_mau <- function(data_mau, size_sum, date_breaks_space ) {
   data_mau %>%
     filter(Category != 0) %>%
     gather(Month_Year, Users, -Category) %>%
