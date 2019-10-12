@@ -1,7 +1,7 @@
 #' @title Segment Purchasing Customers by Recency
 #
 #' @description This package segments customers into New User, Retained or Returned for each month. Please load the following packages
-#' prior: dplyr, tidyverse, data.table, sqldf, lubridate, ggplot2, ggthemes.
+#
 #
 #' @param data A dataframe.
 #' @param id_column_index A column index of the dataframe where Customer IDs are stored.
