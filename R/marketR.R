@@ -24,9 +24,11 @@ table_mau <- function(data, id_column_index, date_column_index) {
   #To ignore warnings during usage
   options(warn=-1)
   options("getSymbols.warning4.0"=FALSE)
-
-  colnames(data)[id_column_index] <- 'ACCT_ID'
-  colnames(data)[date_column_index] <- 'Date'
+  
+  data <- data[,c(id_column_index,date_column_index)]
+    
+  colnames(data)[1] <- 'ACCT_ID'
+  colnames(data)[2] <- 'Date'
   #create month_year column in data
   #Date column needs to be in dmy format
   
