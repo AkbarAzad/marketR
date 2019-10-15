@@ -8,16 +8,18 @@
 #' @param date_column_index A column index of the dataframe where date (of transaction) is stored in dmy format as factor or character.
 #' @param data_mau A dataframe which is the output of table_mau(data,id_column_index,date_column_index).
 #' @param size_sum A dbl number to specify size of text representing total number of customers in a month above bar in plot_mau.
-#; @param date_breaks_space A phrase to specify number of months as a gap between each monthly bar in plot_mau. 
+#' @param date_breaks_space A phrase to specify number of months as a gap between each monthly bar in plot_mau. 
 #
 #' @return NULL
 #
 #' @examples
 #' table_mau(data,1,2)
 #' plot_mau(data_mau, 1.75, "3 months")
+#' raw_mau(data,1,2)
 #
 #' @export table_mau
 #' @export plot_mau
+#' @export raw_mau
 
 
 table_mau <- function(data, id_column_index, date_column_index) {
@@ -223,3 +225,80 @@ plot_mau <- function(data_mau, size_sum, date_breaks_space ) {
     theme_wsj() + theme(legend.text = element_text(size=15,face="bold")) + scale_fill_wsj("colors6")
 
 }
+
+
+raw_mau <- function(data, id_column_index, date_column_index) {
+  #To ignore warnings during usage
+  options(warn=-1)
+  options("getSymbols.warning4.0"=FALSE)
+  
+  data <- data[,c(id_column_index,date_column_index)]
+    
+  colnames(data)[1] <- 'ACCT_ID'
+  colnames(data)[2] <- 'Date'
+  #create month_year column in data
+  #Date column needs to be in dmy format
+  
+  #select ACCT_ID and Date columns
+  
+  data <- data[,c('ACCT_ID','Date')]
+  
+  data_rev <- data %>%
+    mutate(month_year = format(dmy(Date),'%Y-%m'))
+  
+  if(sum(is.na(data_rev$month_year))==nrow(data)) {
+    data_rev$month_year <- format(data$Date,'%Y-%m')
+    }
+
+
+  #remove duplicates by acct_id and month_year
+  data_uniq <- sqldf("SELECT DISTINCT ACCT_ID, month_year FROM data_rev")
+  data_uniq$month_year <- paste(data_uniq$month_year,'-01',sep='')
+
+  #spread month_year by ACCT_ID
+  data_grp <- data_uniq %>% group_by(ACCT_ID,month_year) %>% summarise(n_user = n_distinct(ACCT_ID))
+  data_spread <- data_grp %>%
+    spread("month_year","n_user")
+
+  #replace 1s with the respective ACCT_ID and NAs with 0s
+  data_cohort <- data_spread
+  data_cohort_bin <- data_spread
+  data_cohort_bin[,2:ncol(data_cohort_bin)] <- ifelse(is.na(data_cohort_bin[,2:ncol(data_cohort_bin)]),0,1)
+
+  #deal with 2nd column, i.e. first month_year column
+  data_cohort_bin <- as.data.frame(data_cohort_bin)
+  data_cohort_bin_diff <- data_cohort_bin
+  data_cohort_bin_diff[,2][which(data_cohort_bin[,2]==1)] <- "New User"
+
+  #deal with retained users
+  for(i in 3:ncol(data_cohort_bin)) {
+    data_cohort_bin_diff[,i][which(data_cohort_bin[,i-1]==1 & data_cohort_bin[,i]==1)] <- "Retained"
+  }
+
+  #deal with new users
+  x <- 3
+  total <- data_cohort_bin[,(x-1)]
+  total <- as.data.frame(total)
+  colnames(total)[1] <- 'row_sums'
+  data_cohort_bin_sum <- cbind(data_cohort_bin[,1:(x-1)],total)
+  data_cohort_bin_diff[,x][which(data_cohort_bin_sum[,x]==0 & data_cohort_bin[,x]==1)] <- "New User"
+
+  for(x in 4:ncol(data_cohort_bin_diff)){
+    total <- rowSums(data_cohort_bin[,2:(x-1)])
+    total <- as.data.frame(total)
+    colnames(total)[1] <- 'row_sums'
+    data_cohort_bin_sum <- cbind(data_cohort_bin[,1:(x-1)],total)
+    data_cohort_bin_diff[,x][which(data_cohort_bin_sum[,x]==0 & data_cohort_bin[,x]==1)] <- "New User"
+  }
+
+  #deal with returned users
+  for(x in 4:ncol(data_cohort_bin_diff)){
+    total <- rowSums(data_cohort_bin[,2:(x-1)])
+    total <- as.data.frame(total)
+    colnames(total)[1] <- 'row_sums'
+    data_cohort_bin_sum <- cbind(data_cohort_bin[,1:(x-1)],total)
+    data_cohort_bin_diff[,x][which(data_cohort_bin_sum[,x] != (x-2) & data_cohort_bin_sum[,x] != 0 & data_cohort_bin[,(x-1)] == 0 & data_cohort_bin[,x] == 1 )] <- "Returned"
+  }
+  
+  data_cohort_bin_diff
+  }
