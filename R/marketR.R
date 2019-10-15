@@ -9,6 +9,9 @@
 #' @param data_mau A dataframe which is the output of table_mau(data,id_column_index,date_column_index).
 #' @param size_sum A dbl number to specify size of text representing total number of customers in a month above bar in plot_mau.
 #' @param date_breaks_space A phrase to specify number of months as a gap between each monthly bar in plot_mau. 
+#' @param data_raw A dataframe.
+#' @param id_column_index_raw A column index of the dataframe where Customer IDs are stored.
+#' @param date_column_index_raw A column index of the dataframe where date (of transaction) is stored in dmy format as factor or character.
 #
 #' @return NULL
 #
@@ -227,12 +230,14 @@ plot_mau <- function(data_mau, size_sum, date_breaks_space ) {
 }
 
 
-raw_mau <- function(data, id_column_index, date_column_index) {
+raw_mau <- function(data_raw, id_column_index_raw, date_column_index_raw) {
   #To ignore warnings during usage
   options(warn=-1)
   options("getSymbols.warning4.0"=FALSE)
   
-  data <- data[,c(id_column_index,date_column_index)]
+  data <- data_raw
+  
+  data <- data[,c(id_column_index_raw,date_column_index_raw)]
     
   colnames(data)[1] <- 'ACCT_ID'
   colnames(data)[2] <- 'Date'
